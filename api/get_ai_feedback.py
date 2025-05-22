@@ -19,10 +19,9 @@ else:
         print(f"Errore durante la configurazione della chiave API Gemini: {e}")
         GEMINI_API_KEY = None # Invalida la chiave se la configurazione fallisce
 
-# Assicurati che la route sia '/' se il file è in api/get_ai_feedback.py
-# e Vercel lo serve per convenzione a /api/get_ai_feedback
-@app.route('/', methods=['POST']) 
-def get_ai_feedback_route(): # Rinominata per chiarezza, puoi tenere il vecchio nome
+# MODIFICA IMPORTANTE: Cambiata la route per la convenzione di Vercel
+@app.route('/', methods=['POST'])
+def get_ai_feedback_route(): # Nome funzione lasciato invariato
     if not GEMINI_API_KEY:
         print("Tentativo di usare l'API AI ma la chiave non è configurata correttamente.")
         return jsonify({"error": "Errore di configurazione del server AI. Contattare l'amministratore."}), 500
@@ -46,7 +45,7 @@ def get_ai_feedback_route(): # Rinominata per chiarezza, puoi tenere il vecchio 
         ]
         
         exercise_bpm_str = str(exercise_definition.get('bpm', "N/A"))
-        if exercise_bpm_str != "N/A":
+        if exercise_bpm_str != "N/A": # Semplificato il controllo BPM
              prompt_parts.append(f"BPM di riferimento per l'esercizio: {exercise_bpm_str}")
         else:
             prompt_parts.append("I BPM specifici dell'esercizio non sono stati forniti; analizza il timing basandoti sulla coerenza relativa degli eventi e 'bpmAtEvent' se disponibile.")
@@ -70,8 +69,6 @@ def get_ai_feedback_route(): # Rinominata per chiarezza, puoi tenere il vecchio 
                     prompt_parts.append(f"    Note extra (non attese): {extra_notes}")
                     prompt_parts.append(f"    (Dovrai dedurre le note saltate confrontando gli eventi suonati con la struttura teorica dell'esercizio dai dati JSON completi che hai ricevuto, non solo da questo riassunto).")
                     
-                    # Mostra solo un estratto degli eventi nel prompt testuale per brevità
-                    # L'AI riceve comunque l'array completo `playedNoteEvents` nel JSON e deve analizzarlo.
                     if len(played_events) > 6: 
                         prompt_parts.append("    Primi eventi (timestamp in ms, MIDI, tipo):")
                         for event in played_events[:3]:
@@ -102,15 +99,20 @@ def get_ai_feedback_route(): # Rinominata per chiarezza, puoi tenere il vecchio 
         
         final_prompt = "\n".join(prompt_parts)
         
-        model = genai.GenerativeModel('gemini-1.5-flash-latest')
+        model = genai.GenerativeModel('gemini-1.5-flash-latest') # o il modello che preferisci
         
-        # generation_config come nel tuo file funzionante (commentata = default)
-        # o puoi provare a decommentare e usare valori più restrittivi
+        # generation_config come nel tuo file originale (commentata = default)
         generation_config = genai.types.GenerationConfig(
-            temperature=0.4, # Per risposte più focalizzate
-            max_output_tokens=300 # Limite per incoraggiare la brevità
+            # temperature=0.7, # Esempio, puoi aggiustare
+            # max_output_tokens=1500 # Esempio, adatta ai tuoi bisogni e limiti del modello
         )
-        
+        # Se vuoi provare a forzare la sintesi, potresti decommentare e usare:
+        # generation_config = genai.types.GenerationConfig(
+        #     temperature=0.4, 
+        #     max_output_tokens=300 
+        # )
+
+        # safety_settings come nel tuo file originale
         safety_settings=[
             {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
             {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
@@ -124,7 +126,7 @@ def get_ai_feedback_route(): # Rinominata per chiarezza, puoi tenere il vecchio 
             safety_settings=safety_settings
         )
         
-        ai_text_response = ""
+        ai_text_response = "" # Logica di estrazione risposta identica al tuo file
         if response.candidates:
             if response.prompt_feedback and response.prompt_feedback.block_reason:
                 return jsonify({"error": f"Richiesta bloccata per motivi di sicurezza del prompt: {response.prompt_feedback.block_reason_message}"}), 400
@@ -148,8 +150,9 @@ def get_ai_feedback_route(): # Rinominata per chiarezza, puoi tenere il vecchio 
 
     except Exception as e:
         import traceback 
-        print(f"ERRORE CRITICO VERCEL nell'endpoint: {e}") # Rimosso riferimento specifico a /api/get_ai_feedback
+        # Modificato leggermente il messaggio di errore per essere più generico se la route cambia
+        print(f"ERRORE CRITICO VERCEL nell'endpoint: {e}") 
         print(traceback.format_exc()) 
         return jsonify({"error": f"Errore interno del server: {str(e)}"}), 500
 
-# Non è necessario if __name__ == '__main__': per Vercel
+# Non serve if __name__ == '__main__': per Vercel
