@@ -37,7 +37,7 @@ def get_ai_feedback_route():
         if not exercise_definition or not exercise_stats:
             return jsonify({"error": "Dati mancanti: 'exerciseDefinition' o 'exerciseStats' non forniti"}), 400
 
-        # --- INIZIO PROMPT SINTETICO (come da nostra precedente discussione) ---
+        # --- INIZIO MODIFICA PROMPT PER SINTESI ---
         prompt_parts = [
             "Sei un insegnante di pianoforte AI esperto, amichevole e incoraggiante. Il tuo feedback deve essere CONCISO e strutturato in TRE PARTI OBBLIGATORIE come descritto alla fine di questo prompt.",
             f"Esercizio: {exercise_definition.get('name', 'Sconosciuto')}",
@@ -49,7 +49,6 @@ def get_ai_feedback_route():
              prompt_parts.append(f"BPM di riferimento per l'esercizio: {exercise_bpm_str}")
         else:
             prompt_parts.append("I BPM specifici dell'esercizio non sono stati forniti; analizza il timing basandoti sulla coerenza relativa degli eventi e 'bpmAtEvent' se disponibile.")
-
 
         all_repetitions_data = exercise_stats.get('allRepetitionsData', [])
         if all_repetitions_data:
@@ -70,7 +69,6 @@ def get_ai_feedback_route():
                     prompt_parts.append(f"    Note extra (non attese): {extra_notes}")
                     prompt_parts.append(f"    (Dovrai dedurre le note saltate confrontando gli eventi suonati con la struttura teorica dell'esercizio dai dati JSON completi che hai ricevuto, non solo da questo riassunto).")
                     
-                    # Mostra solo un estratto degli eventi nel prompt testuale per brevità
                     if len(played_events) > 6: 
                         prompt_parts.append("    Primi eventi (timestamp in ms, MIDI, tipo):")
                         for event in played_events[:3]:
@@ -97,20 +95,19 @@ def get_ai_feedback_route():
         prompt_parts.append("    - Se la performance necessita di miglioramenti significativi: 'Il mio giudizio è che l'esercizio necessita ancora di lavoro. Principalmente perché:' e poi elenca MOLTO BREVEMENTE (max 1-2 motivi chiave) tra: 'non hai rispettato i tempi delle note (anticipi/ritardi/durate errate)', 'hai saltato diverse note', 'hai suonato note errate in altezza'.")
         prompt_parts.append("2.  **UN CONSIGLIO PRATICO (1-2 frasi):** Fornisci UN solo suggerimento breve e specifico per aiutare l'utente a migliorare l'aspetto più critico che hai identificato nei 'playedNoteEvents'. Sii specifico sulla causa del problema (es. 'Rallenta e concentrati sul contare ad alta voce le suddivisioni per le crome nella battuta X.' o 'Presta attenzione all'alterazione (diesis/bemolle) sulla nota Y per correggere l'altezza.').")
         prompt_parts.append("3.  **INCORAGGIAMENTO FINALE (1 frase):** Concludi con una frase positiva e incoraggiante. Esempi: 'Continua così, vedo dei miglioramenti!' o 'Non mollare, con un po' di pratica mirata ci arriverai!' o 'Stai facendo progressi, l'impegno paga!'")
-        # --- FINE PROMPT SINTETICO ---
+        # --- FINE MODIFICA PROMPT ---
         
         final_prompt = "\n".join(prompt_parts)
         
-        # print(f"DEBUG: Final Prompt (prime 500): {final_prompt[:500]}") # Per debug
-        # print(f"DEBUG: Final Prompt (ultime 500): {final_prompt[-500:]}") # Per debug
-
-        model = genai.GenerativeModel('gemini-1.5-flash-latest')
+        model = genai.GenerativeModel('gemini-1.5-flash-latest') # o il modello che preferisci
         
+        # Utilizziamo la generation_config del tuo file funzionante (commentata = default)
         generation_config = genai.types.GenerationConfig(
-            temperature=0.4, # Leggermente più basso per risposte più focalizzate sulla struttura
-            max_output_tokens=300 # Abbastanza per un feedback conciso in 3 parti
+            # temperature=0.7, # Esempio, puoi aggiustare
+            # max_output_tokens=1500 # Esempio, adatta ai tuoi bisogni e limiti del modello
         )
-        safety_settings=[
+        
+        safety_settings=[ # Identico al tuo file funzionante
             {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
             {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
             {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
@@ -123,8 +120,7 @@ def get_ai_feedback_route():
             safety_settings=safety_settings
         )
         
-        ai_text_response = ""
-        # Logica per estrarre la risposta (invariata rispetto al tuo script funzionante)
+        ai_text_response = "" # Identico al tuo file funzionante
         if response.candidates:
             if response.prompt_feedback and response.prompt_feedback.block_reason:
                 return jsonify({"error": f"Richiesta bloccata per motivi di sicurezza del prompt: {response.prompt_feedback.block_reason_message}"}), 400
@@ -142,8 +138,8 @@ def get_ai_feedback_route():
              ai_text_response = "L'AI non ha generato una risposta (nessun candidato)."
              if response.prompt_feedback and response.prompt_feedback.block_reason:
                 ai_text_response = f"Richiesta bloccata (nessun candidato): {response.prompt_feedback.block_reason_message}"
-                return jsonify({"aiFeedbackText": ai_text_response}), 400 # Restituisce 400 anche qui
-
+                return jsonify({"aiFeedbackText": ai_text_response}), 400 
+        
         return jsonify({"aiFeedbackText": ai_text_response.strip()})
 
     except Exception as e:
