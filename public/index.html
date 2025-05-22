@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Piano Blues Teacher</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css"> <!-- Assicurati che il nome del file CSS sia corretto -->
     <!-- Importante: Carica VexFlow -->
     <script src="https://unpkg.com/vexflow@4.2.3/build/cjs/vexflow.js"></script>
 </head>
@@ -34,6 +34,7 @@
         <label for="exercise-select">Esercizio:</label>
         <select id="exercise-select" disabled>
             <option value="">-- Prima seleziona una categoria --</option>
+            <!-- Popolato da JS -->
         </select>
 
         <!-- CONTROLLO VELOCITÀ SCROLLING -->
@@ -49,7 +50,7 @@
             <input type="number" id="bpm-input" value="100" min="30" max="240" step="1">
             <button id="metronome-toggle-button">Avvia Metronomo</button>
             <div id="metronome-visual-indicator" class="metronome-indicator-off"></div>
-            <span class="metronome-auto-start-group"> <!-- Raggruppamento per checkbox e label come da CSS -->
+            <span class="metronome-auto-start-group">
                 <input type="checkbox" id="metronome-auto-start">
                 <label for="metronome-auto-start">Avvia con esercizio</label>
             </span>
@@ -57,7 +58,7 @@
         <!-- === FINE CONTROLLI METRONOMO === -->
     </div>
 
-    <!-- === AREA DI STATO MODIFICATA PER LE STATISTICHE DETTAGLIATE === -->
+    <!-- === AREA DI STATO MODIFICATA PER LE STATISTICHE DETTAGLIATE E FEEDBACK AI === -->
     <div class="status-area">
         <div class="status-column"> <!-- Colonna per info base -->
             <p>Stato MIDI: <span id="midi-status">Inizializzazione...</span></p>
@@ -77,6 +78,16 @@
                 <p>Nessun errore o esercizio non completato.</p>
             </div>
         </div>
+        
+        <!-- === NUOVA COLONNA PER FEEDBACK AI === -->
+        <div class="status-column ai-feedback-column"> 
+            <h4>Feedback dall'Esperto AI:</h4>
+            <div id="ai-feedback-content">
+                <p>Completa un esercizio per ricevere un'analisi AI.</p>
+            </div>
+            <button id="get-ai-feedback-button" style="display: none;">Analizza con AI</button>
+        </div>
+        <!-- === FINE NUOVA COLONNA PER FEEDBACK AI === -->
     </div>
     <!-- === FINE AREA DI STATO MODIFICATA === -->
 
@@ -86,9 +97,11 @@
         <button id="pause-button" disabled>Pause</button>
         <button id="stop-button" disabled>Stop</button>
         <button id="theory-button">Teoria</button>
-        <button id="next-system-button" disabled>Avanti Sistema</button> <!-- MANTENUTO DAL TUO HTML ORIGINALE -->
+        <!-- Il pulsante "Avanti Sistema" è stato rimosso perché non sembrava avere una funzionalità definita nel JS principale
+             e non era presente nello screenshot della versione verde. Se ti serve, puoi reinserirlo.
+        <button id="next-system-button" disabled>Avanti Sistema</button> 
+        -->
     </div>
-
 
     <!-- Area VexFlow -->
     <div id="score">
@@ -96,11 +109,12 @@
     </div>
 
     <!-- =============================================== -->
-    <!-- CARICA I FILE DEGLI ESERCIZI QUI (DAL TUO HTML ORIGINALE) -->
+    <!-- CARICA I FILE DEGLI ESERCIZI QUI                -->
+    <!-- Assicurati che i percorsi siano corretti       -->
     <!-- =============================================== -->
     <script src="js/exercises/charper_1.js"></script>
     <script src="js/exercises/charper_2.js"></script>
-    <script src="js/exercises/charper_3.js"></script>
+    <script src="js/exercises/charper_3.js"></script> <!-- Quello che mi hai dato come esempio -->
     <script src="js/exercises/charper_4.js"></script>
     <script src="js/exercises/charper_5.js"></script>
     <script src="js/exercises/charper_6.js"></script>
@@ -108,9 +122,14 @@
     <script src="js/exercises/charper_8.js"></script>
     <script src="js/exercises/charper_9.js"></script>
     <script src="js/exercises/charper_10.js"></script>
+    <!-- Aggiungi altri file di esercizi se ne hai -->
+
     <!-- =============================================== -->
-    <!-- CARICA IL MODULO PRINCIPALE (DAL TUO HTML ORIGINALE) -->
+    <!-- CARICA I MODULI JAVASCRIPT PRINCIPALI          -->
+    <!-- Assicurati che i percorsi siano corretti       -->
     <!-- =============================================== -->
+    <!-- Non è più necessario caricare midi_handler.js e metronome.js separatamente 
+         se sono importati come moduli da main.js -->
     <script type="module" src="js/main.js"></script>
 
 </body>
