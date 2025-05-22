@@ -37,7 +37,7 @@ def get_ai_feedback_route():
         if not exercise_definition or not exercise_stats:
             return jsonify({"error": "Dati mancanti: 'exerciseDefinition' o 'exerciseStats' non forniti"}), 400
 
-        # --- Costruisci il prompt per Gemini (versione per feedback conciso a 3 parti) ---
+        # --- INIZIO PROMPT SINTETICO (come da nostra precedente discussione) ---
         prompt_parts = [
             "Sei un insegnante di pianoforte AI esperto, amichevole e incoraggiante. Il tuo feedback deve essere CONCISO e strutturato in TRE PARTI OBBLIGATORIE come descritto alla fine di questo prompt.",
             f"Esercizio: {exercise_definition.get('name', 'Sconosciuto')}",
@@ -64,30 +64,27 @@ def get_ai_feedback_route():
                     incorrect_matches = sum(1 for e in played_events if e.get('type') == 'incorrect_match')
                     extra_notes = sum(1 for e in played_events if e.get('type') == 'extra_note')
                     
-                    # Forniamo un riassunto degli errori di altezza e il numero totale di eventi per contesto
                     prompt_parts.append(f"    Eventi suonati totali: {len(played_events)}")
                     prompt_parts.append(f"    Note corrette in altezza: {correct_matches}")
                     prompt_parts.append(f"    Errori di altezza (nota diversa dall'attesa): {incorrect_matches}")
                     prompt_parts.append(f"    Note extra (non attese): {extra_notes}")
                     prompt_parts.append(f"    (Dovrai dedurre le note saltate confrontando gli eventi suonati con la struttura teorica dell'esercizio dai dati JSON completi che hai ricevuto, non solo da questo riassunto).")
                     
-                    # Per il prompt, mostriamo solo i primi e gli ultimi eventi per dare un'idea
-                    # L'AI riceve comunque l'array completo `playedNoteEvents` nel JSON e deve analizzarlo.
-                    if len(played_events) > 6: # Mostra i primi 3 e gli ultimi 3 se ci sono abbastanza eventi
+                    # Mostra solo un estratto degli eventi nel prompt testuale per brevità
+                    if len(played_events) > 6: 
                         prompt_parts.append("    Primi eventi (timestamp in ms, MIDI, tipo):")
                         for event in played_events[:3]:
-                            ts_rel_to_rep_start = round(event.get('timestamp', 0) - rep_data.get('startTime', 0))
+                            ts_rel_to_rep_start = round(event.get('timestamp', 0) - rep_data.get('startTime', 0)) if rep_data.get('startTime') else "N/A"
                             prompt_parts.append(f"      - {ts_rel_to_rep_start}ms, MIDI {event['midiValuePlayed']}, {event['type']}")
                         prompt_parts.append("    Ultimi eventi (timestamp in ms, MIDI, tipo):")
                         for event in played_events[-3:]:
-                            ts_rel_to_rep_start = round(event.get('timestamp', 0) - rep_data.get('startTime', 0))
+                            ts_rel_to_rep_start = round(event.get('timestamp', 0) - rep_data.get('startTime', 0)) if rep_data.get('startTime') else "N/A"
                             prompt_parts.append(f"      - {ts_rel_to_rep_start}ms, MIDI {event['midiValuePlayed']}, {event['type']}")
                     elif played_events:
                         prompt_parts.append("    Eventi (timestamp in ms, MIDI, tipo):")
                         for event in played_events:
-                            ts_rel_to_rep_start = round(event.get('timestamp', 0) - rep_data.get('startTime', 0))
+                            ts_rel_to_rep_start = round(event.get('timestamp', 0) - rep_data.get('startTime', 0)) if rep_data.get('startTime') else "N/A"
                             prompt_parts.append(f"      - {ts_rel_to_rep_start}ms, MIDI {event['midiValuePlayed']}, {event['type']}")
-                    
                 else:
                     prompt_parts.append("    Nessun evento nota registrato per questa ripetizione (indica che tutte le note sono state saltate).")
         else:
@@ -100,17 +97,18 @@ def get_ai_feedback_route():
         prompt_parts.append("    - Se la performance necessita di miglioramenti significativi: 'Il mio giudizio è che l'esercizio necessita ancora di lavoro. Principalmente perché:' e poi elenca MOLTO BREVEMENTE (max 1-2 motivi chiave) tra: 'non hai rispettato i tempi delle note (anticipi/ritardi/durate errate)', 'hai saltato diverse note', 'hai suonato note errate in altezza'.")
         prompt_parts.append("2.  **UN CONSIGLIO PRATICO (1-2 frasi):** Fornisci UN solo suggerimento breve e specifico per aiutare l'utente a migliorare l'aspetto più critico che hai identificato nei 'playedNoteEvents'. Sii specifico sulla causa del problema (es. 'Rallenta e concentrati sul contare ad alta voce le suddivisioni per le crome nella battuta X.' o 'Presta attenzione all'alterazione (diesis/bemolle) sulla nota Y per correggere l'altezza.').")
         prompt_parts.append("3.  **INCORAGGIAMENTO FINALE (1 frase):** Concludi con una frase positiva e incoraggiante. Esempi: 'Continua così, vedo dei miglioramenti!' o 'Non mollare, con un po' di pratica mirata ci arriverai!' o 'Stai facendo progressi, l'impegno paga!'")
+        # --- FINE PROMPT SINTETICO ---
         
         final_prompt = "\n".join(prompt_parts)
         
-        # print(f"DEBUG VERCEL: Prompt inviato a Gemini (prime 2000 chars): {final_prompt[:2000]}...") # Utile per debug
-        # print(f"DEBUG VERCEL: Prompt inviato a Gemini (ultime 1000 chars): {final_prompt[-1000:]}...") # Utile per debug
+        # print(f"DEBUG: Final Prompt (prime 500): {final_prompt[:500]}") # Per debug
+        # print(f"DEBUG: Final Prompt (ultime 500): {final_prompt[-500:]}") # Per debug
 
-        model = genai.GenerativeModel('gemini-1.5-flash-latest') 
+        model = genai.GenerativeModel('gemini-1.5-flash-latest')
         
         generation_config = genai.types.GenerationConfig(
-            # temperature=0.5, # Più basso per risposte più deterministiche e focalizzate
-            # max_output_tokens=250 # Limita la lunghezza per incoraggiare la concisione
+            temperature=0.4, # Leggermente più basso per risposte più focalizzate sulla struttura
+            max_output_tokens=300 # Abbastanza per un feedback conciso in 3 parti
         )
         safety_settings=[
             {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
@@ -126,33 +124,26 @@ def get_ai_feedback_route():
         )
         
         ai_text_response = ""
+        # Logica per estrarre la risposta (invariata rispetto al tuo script funzionante)
         if response.candidates:
             if response.prompt_feedback and response.prompt_feedback.block_reason:
-                # print(f"DEBUG VERCEL: Prompt bloccato per: {response.prompt_feedback.block_reason_message}")
                 return jsonify({"error": f"Richiesta bloccata per motivi di sicurezza del prompt: {response.prompt_feedback.block_reason_message}"}), 400
 
             first_candidate = response.candidates[0]
             if first_candidate.finish_reason.name == "SAFETY":
                  safety_ratings_info = ", ".join([f"{sr.category.name}: {sr.probability.name}" for sr in first_candidate.safety_ratings])
-                 # print(f"DEBUG VERCEL: Risposta bloccata per motivi di sicurezza. Dettagli: {safety_ratings_info}")
                  return jsonify({"error": "La risposta dell'AI è stata bloccata per motivi di sicurezza."}), 500
             
             if first_candidate.content and first_candidate.content.parts:
                 ai_text_response = "".join(part.text for part in first_candidate.content.parts if hasattr(part, 'text'))
             else:
                 ai_text_response = "L'AI non ha fornito una risposta testuale utilizzabile (parti mancanti o contenuto non valido)."
-                # print(f"DEBUG VERCEL: Candidato ricevuto ma senza parti di testo o contenuto non valido: {first_candidate}")
         else:
              ai_text_response = "L'AI non ha generato una risposta (nessun candidato)."
              if response.prompt_feedback and response.prompt_feedback.block_reason:
-                # print(f"DEBUG VERCEL: Prompt bloccato (nessun candidato), motivo: {response.prompt_feedback.block_reason_message}")
                 ai_text_response = f"Richiesta bloccata (nessun candidato): {response.prompt_feedback.block_reason_message}"
-                # Qui potremmo voler restituire un errore 400 o un messaggio specifico che il frontend può gestire
-                return jsonify({"aiFeedbackText": ai_text_response, "error_type": "prompt_blocked"}), 400 
-             # print(f"DEBUG VERCEL: Nessun candidato nella risposta: {response}")
+                return jsonify({"aiFeedbackText": ai_text_response}), 400 # Restituisce 400 anche qui
 
-
-        # print(f"DEBUG VERCEL: Risposta dall'AI: {ai_text_response}") # Utile per debug
         return jsonify({"aiFeedbackText": ai_text_response.strip()})
 
     except Exception as e:
@@ -161,7 +152,5 @@ def get_ai_feedback_route():
         print(traceback.format_exc()) 
         return jsonify({"error": f"Errore interno del server: {str(e)}"}), 500
 
-# Il blocco if __name__ == '__main__': può essere rimosso o lasciato per test locali.
-# Vercel lo ignorerà comunque.
 # if __name__ == '__main__':
 #     app.run(debug=True, port=5000)
