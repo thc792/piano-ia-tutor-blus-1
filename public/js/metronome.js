@@ -1,3 +1,34 @@
+/*
+ * -----------------------------------------------------------------------------
+ * Copyright (c) 2023-2024 Lorenzetti Giuseppe. Tutti i diritti riservati.
+ * -----------------------------------------------------------------------------
+ *
+ * Nome File: [Inserisci qui il nome del file, es. main.js]
+ * Progetto: [Inserisci qui il nome del progetto, es. Piano Blues Teacher]
+ * Autore: Lorenzetti Giuseppe
+ * Email: pianothc791@gmail.com
+ * Sito Web: www.pianohitech.com (se disponibile)
+ *
+ * Data Creazione: [Inserisci Data,  2023-10-26]
+ * Ultima Modifica: [Inserisci Data,  2025-05-15]
+ * Versione: [Inserisci Versione, es. 1.0.0]
+ *
+ * 
+ *
+ * NOTE LEGALI:
+ * Questo software è fornito "così com'è", senza alcuna garanzia espressa o
+ * implicita. In nessun caso l'autore sarà ritenuto responsabile per eventuali
+ * danni derivanti dall'uso di questo software.
+ *
+ * La riproduzione, la distribuzione o la modifica non autorizzata di questo
+ * software, o di qualsiasi sua parte, è severamente vietata e può comportare
+ * sanzioni civili e penali.
+ *
+ * Questo software è proprietario e confidenziale.
+ * È concesso in licenza, non venduto.
+ * -----------------------------------------------------------------------------
+ */
+
 // js/metronome.js
 
 // --- Riferimenti DOM per Metronomo (definiti qui perché usati solo da questo modulo) ---

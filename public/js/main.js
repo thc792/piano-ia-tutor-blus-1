@@ -1,8 +1,32 @@
-/**
- * main.js
- * Logica principale per Piano Tutor Extrame Edition V2
- * VERSIONE COMPLETA CON IMPLEMENTAZIONI DI BASE, INTEGRAZIONE AI,
- * SINTESI VOCALE E REGISTRAZIONE DETTAGLIATA EVENTI NOTA.
+/*
+ * -----------------------------------------------------------------------------
+ * Copyright (c) 2023-2024 Lorenzetti Giuseppe. Tutti i diritti riservati.
+ * -----------------------------------------------------------------------------
+ *
+ * Nome File: [Inserisci qui il nome del file, es. main.js]
+ * Progetto: [Inserisci qui il nome del progetto, es. Piano Blues Teacher]
+ * Autore: Lorenzetti Giuseppe
+ * Email: pianothc791@gmail.com
+ * Sito Web: www.pianohitech.com (se disponibile)
+ *
+ * Data Creazione: [Inserisci Data, es. 2023-10-26]
+ * Ultima Modifica: [Inserisci Data, es. 2024-03-15]
+ * Versione: [Inserisci Versione, es. 1.0.0]
+ *
+ * 
+ *
+ * NOTE LEGALI:
+ * Questo software è fornito "così com'è", senza alcuna garanzia espressa o
+ * implicita. In nessun caso l'autore sarà ritenuto responsabile per eventuali
+ * danni derivanti dall'uso di questo software.
+ *
+ * La riproduzione, la distribuzione o la modifica non autorizzata di questo
+ * software, o di qualsiasi sua parte, è severamente vietata e può comportare
+ * sanzioni civili e penali.
+ *
+ * Questo software è proprietario e confidenziale.
+ * È concesso in licenza, non venduto.
+ * -----------------------------------------------------------------------------
  */
 
 import { renderExercise } from './vexflow_renderer.js';
