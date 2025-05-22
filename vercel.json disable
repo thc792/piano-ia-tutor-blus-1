@@ -1,19 +1,21 @@
 {
-    "version": 2,
-    "builds": [
-        {
-            "src": "api/get_ai_feedback.py",
-            "use": "@vercel/python"
-        }
-    ],
-    "routes": [
-        {
-            "src": "/api/(.*)",
-            "dest": "/api/$1"
-        },
-        {
-            "src": "/(.*)",
-            "dest": "/public/$1"
-        }
-    ]
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/get_ai_feedback.py",  // Deve corrispondere alla tua struttura
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    // Inoltra la richiesta esterna /api/get_ai_feedback al file che la gestisce
+    {
+      "src": "/api/get_ai_feedback", 
+      "dest": "api/get_ai_feedback.py" 
+    },
+    // Serve i file statici dalla cartella public
+    {
+      "src": "/(.*)",
+      "dest": "/public/$1"
+    }
+  ]
 }
