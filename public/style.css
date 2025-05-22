@@ -1,0 +1,523 @@
+/**
+
+ * Copyright (c) 2023-2024 Lorenzetti Giuseppe
+ * Tutti i diritti riservati.
+ *
+ * Questo software è proprietario e confidenziale.
+ * È concesso in licenza, non venduto. L'uso, la riproduzione, la modifica
+ * o la distribuzione non autorizzata di questo software, o di qualsiasi sua parte,
+ * sono severamente vietati.
+ *
+ * Per informazioni sulla licenza e per i termini di utilizzo completi,
+ * fare riferimento al file LICENSE.md disponibile nel repository del progetto:
+ * https:https://github.com/Piano tutor blues/blob/main/LICENSE.md]
+ * o contattare [pianothc791@gmail.com].
+ */
+
+/* Reset base e font globale */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    line-height: 1.6;
+    margin: 0;
+    background-color: #415A77; /* Blu Acciaio/Grigio */
+    color: #E0E1DD;
+    font-size: 16px;
+}
+
+/* Header dell'applicazione per contenere titolo e note */
+.app-header {
+    background-color: #0D1B2A; /* Blu Scuro Principale */
+    padding: 40px 20px 50px 20px;
+    text-align: center;
+    position: relative;
+    min-height: 180px;
+    overflow: hidden;
+    border-bottom: 3px solid #778DA9; /* Grigio-Blu per bordo */
+    margin-bottom: 20px;
+}
+
+/* Note Svolazzanti */
+.floating-note {
+    position: absolute;
+    font-size: 28px;
+    color: #E0E1DD;
+    opacity: 0.8;
+    user-select: none;
+    animation: float 12s ease-in-out infinite alternate;
+    text-shadow:
+        0 0 4px #85C1E9,
+        0 0 8px #5DADE2;
+}
+.floating-note.note-1 { top: 15%; left: 10%; animation-delay: 0s; font-size: 30px; transform: rotate(-10deg); }
+.floating-note.note-2 { top: 30%; left: 85%; animation-delay: -2.5s; font-size: 26px; transform: rotate(15deg); }
+.floating-note.note-3 { top: 5%; left: 35%; animation-delay: -5s; font-size: 32px; transform: rotate(5deg); }
+.floating-note.note-5 { top: 40%; left: 20%; animation-delay: -3s; font-size: 28px; transform: rotate(20deg); }
+.floating-note.note-6 { top: 10%; left: 70%; animation-delay: -1.5s; font-size: 24px; transform: rotate(-15deg); }
+.floating-note.note-7 { top: 50%; left: 50%; animation-delay: -6s; font-size: 30px; transform: rotate(10deg); }
+.floating-note.note-8 { top: 25%; left: 5%; animation-delay: -8s; font-size: 28px; transform: rotate(-5deg); }
+.floating-note.note-9 { top: 5%; left: 90%; animation-delay: -10s; font-size: 26px; transform: rotate(25deg); }
+
+@keyframes float {
+    0% { transform: translateY(0px) translateX(0px) rotate(-5deg); opacity: 0.5; }
+    25% { transform: translateY(-12px) translateX(6px) rotate(0deg); opacity: 0.7; }
+    50% { transform: translateY(-6px) translateX(-6px) rotate(8deg); opacity: 0.6; }
+    75% { transform: translateY(6px) translateX(6px) rotate(-3deg); opacity: 0.7; }
+    100% { transform: translateY(0px) translateX(0px) rotate(-5deg); opacity: 0.5; }
+}
+
+/* Titolo principale con riquadro argento */
+h1 {
+    color: #E0E1DD;
+    margin: 0 auto;
+    font-weight: bold;
+    font-size: 2.5em;
+    text-shadow:
+        0 0 2px #1B263B,
+        0 0 8px #85C1E9,
+        0 0 12px #5DADE2,
+        0 0 18px #415A77;
+    border: 3px solid #C0C0C0; /* Argento */
+    padding: 12px 25px;
+    border-radius: 10px;
+    display: inline-block;
+    background-color: rgba(27, 38, 59, 0.6); /* Sfondo Blu Scuro semi-trasparente */
+    box-shadow: 0 0 12px rgba(192, 192, 192, 0.6); /* Ombra Argento */
+    position: relative;
+    z-index: 10;
+}
+
+/* Contenitori per controlli (selettori e slider) */
+.controls {
+    margin: 20px;
+    margin-bottom: 10px;
+    padding: 15px 20px;
+    background-color: #1B263B; /* Blu Scuro Secondario */
+    border: 1px solid #778DA9; /* Grigio-Blu */
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Elementi dentro i controls (selettori e slider) */
+.controls label,
+.controls select,
+.controls .scroll-speed-control {
+    margin: 5px 10px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    vertical-align: middle;
+    font-size: 0.95em;
+    color: #E0E1DD; /* Assicura che le etichette siano leggibili */
+}
+.controls select {
+    background-color: #0D1B2A; /* Sfondo scuro per select */
+    border: 1px solid #778DA9; /* Bordo coerente */
+    color: #E0E1DD; /* Testo del select */
+}
+
+
+/* Stili specifici per il controllo velocità */
+.scroll-speed-control {
+    display: inline-block;
+    /* align-items: center; /* Rimosso perché label e input sono già allineati con vertical-align */
+    background-color: #0D1B2A; /* Blu Scuro Principale */
+    border: 1px solid #778DA9; /* Grigio-Blu */
+    border-radius: 4px;
+    padding: 5px 10px; /* Ridotto padding per compattezza */
+}
+
+.scroll-speed-control label {
+    margin-right: 10px;
+    font-weight: normal;
+    padding: 0; /* Rimuovi padding extra se non necessario */
+    border: none; /* Rimuovi bordo extra se non necessario */
+    background-color: transparent; /* Rimuovi sfondo extra se non necessario */
+}
+
+.scroll-speed-control input[type="range"] {
+    vertical-align: middle;
+    margin: 0 5px;
+    cursor: pointer;
+}
+
+.scroll-speed-control span {
+    font-weight: bold;
+    min-width: 20px;
+    text-align: center;
+    color: #E0E1DD;
+}
+
+/* === METRONOME CONTROLS (Integrated and Themed) === */
+.metronome-controls {
+    margin-top: 15px; /* Spazio dagli altri controlli sopra */
+    padding: 10px 15px;
+    background-color: #0D1B2A; /* Blu Scuro Principale, per raggruppamento visivo */
+    border: 1px solid #415A77; /* Bordo leggermente più scuro per distinzione */
+    border-radius: 6px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 10px; /* Spazio tra gli elementi del metronomo */
+}
+
+.metronome-controls label,
+.metronome-controls input[type="number"],
+.metronome-controls button,
+.metronome-controls input[type="checkbox"],
+#metronome-visual-indicator {
+    vertical-align: middle; /* Allineamento base */
+    color: #E0E1DD; /* Colore testo default */
+}
+
+.metronome-controls label { /* Stile specifico per le label del metronomo */
+    padding: 0; /* Rimuove padding extra per coerenza con scroll-speed-control label */
+    font-size: 0.95em; /* Coerente con altri controlli */
+}
+
+.metronome-controls input[type="number"] {
+    width: 70px; /* Leggermente più largo per numeri a 3 cifre */
+    padding: 8px;
+    background-color: #1B263B; /* Blu Scuro Secondario (come .controls) */
+    border: 1px solid #778DA9; /* Grigio-Blu */
+    color: #E0E1DD;
+    border-radius: 4px;
+    text-align: center;
+    font-size: 0.95em;
+}
+
+#metronome-toggle-button {
+    padding: 8px 15px;
+    font-size: 0.95em;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+    background-color: #17a2b8; /* Teal, come #theory-button */
+    color: white;
+    border: 1px solid #138496; /* Darker Teal */
+}
+
+#metronome-toggle-button:hover:not(:disabled) {
+    background-color: #138496; /* Darker Teal on hover */
+    border-color: #106d7c;
+}
+
+#metronome-toggle-button.metronome-active { /* Stato quando il metronomo è ON */
+    background-color: #dc3545; /* Rosso, come #stop-button */
+    border-color: #c82333;
+}
+
+#metronome-toggle-button.metronome-active:hover:not(:disabled) {
+    background-color: #c82333; /* Rosso più scuro al hover */
+    border-color: #b01c2a;
+}
+
+#metronome-toggle-button:disabled {
+    background-color: #6c757d; /* Grigio standard per disabilitato */
+    border-color: #6c757d; /* Bordo Grigio */
+    color: #adb5bd; /* Testo più chiaro per disabilitato */
+    cursor: not-allowed;
+}
+
+#metronome-visual-indicator {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #4a5e70; /* Grigio-Blu scuro per stato "spento" */
+    border: 1px solid #778DA9; /* Bordo sottile coerente */
+    transition: background-color 0.05s ease-out, box-shadow 0.1s ease-out;
+}
+
+.metronome-indicator-on {
+    background-color: #85C1E9 !important; /* Blu chiaro acceso (come valori status) */
+    box-shadow: 0 0 8px #85C1E9, 0 0 12px rgba(133, 193, 233, 0.5); /* Glow effect */
+}
+
+.metronome-controls .metronome-auto-start-group { /* Per raggruppare checkbox e la sua label */
+    display: flex;
+    align-items: center;
+    gap: 5px; /* Spazio tra checkbox e label */
+}
+
+.metronome-controls input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    /* Stili custom per checkbox sono complessi e cross-browser,
+       per ora si usano quelli di default del browser. Accent color può essere un'opzione. */
+    accent-color: #85C1E9; /* Colora la checkbox quando selezionata (browser moderni) */
+}
+.metronome-controls label[for="metronome-auto-start"] {
+    font-size: 0.9em; /* Leggermente più piccola per la label della checkbox */
+    font-weight: normal;
+}
+/* === FINE METRONOME CONTROLS === */
+
+
+/* === AREA DI STATO MODIFICATA PER COLONNE === */
+.status-area {
+    margin: 10px 20px 10px 20px;
+    padding: 15px 20px;
+    background-color: #1B263B; /* Blu Scuro Secondario */
+    border: 1px solid #778DA9; /* Grigio-Blu */
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    display: flex; /* Abilita Flexbox per layout a colonne */
+    justify-content: space-between;
+    gap: 15px;
+    flex-wrap: wrap; /* Permette alle colonne di andare a capo su schermi piccoli */
+}
+
+.status-column {
+    flex: 1;
+    padding: 10px;
+    border: 1px dashed #4a5e70; /* Bordo tratteggiato più scuro, coerente con palette blu */
+    border-radius: 5px;
+    min-width: 200px; /* O regola secondo necessità */
+    background-color: rgba(13, 27, 42, 0.2); /* Sfondo leggermente distinto */
+}
+
+.status-column h4 {
+    color: #C0C0C0; /* Argento per i titoli delle sezioni statistiche, come il bordo di h1 */
+    margin-bottom: 8px;
+    text-align: center;
+}
+
+.status-area p { /* Stile generale per i paragrafi nell'area di stato */
+    margin: 5px 0;
+    text-align: left; /* Allinea a sinistra il testo dentro le colonne */
+}
+
+.status-area span { /* Stile generale per gli span (valori) */
+    font-weight: bold;
+    color: #85C1E9; /* Blu chiaro per i valori, come prima */
+}
+
+/* Stili specifici per i contenitori delle nuove statistiche */
+.exercise-stats-container, .errors-detail-container {
+    background-color: rgba(13, 27, 42, 0.4); /* Sfondo leggermente più scuro e trasparente per distinzione */
+}
+
+.errors-list {
+    max-height: 120px;
+    overflow-y: auto;
+    padding: 5px;
+    border: 1px solid #4a5e70; /* Coerente con status-column border */
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+.errors-list p { /* Messaggio di default */
+    font-style: italic;
+    color: #a0a0a0; /* Grigio chiaro per testo non importante */
+    text-align: center;
+}
+
+.errors-list ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.errors-list li {
+    padding: 3px 0;
+    border-bottom: 1px dotted #4a5e70; /* Coerente */
+}
+.errors-list li:last-child {
+    border-bottom: none;
+}
+
+.errors-list strong { /* Per evidenziare parti importanti (es. 'Atteso', 'Suonato', numero Rip.) */
+    color: #C0C0C0; /* Argento, come h4 */
+}
+.errors-list small { /* Per dettagli meno importanti (es. timestamp) */
+    color: #b0b0b0; /* Grigio chiaro */
+}
+/* === FINE MODIFICHE AREA DI STATO === */
+
+
+/* Nuovo stile per il contenitore dei pulsanti di controllo */
+.control-buttons {
+    margin: 10px 20px 20px 20px;
+    text-align: center;
+}
+
+/* Stili per i pulsanti nel contenitore control-buttons */
+.control-buttons button {
+    margin: 5px 10px; /* Aggiunto margine verticale per wrapping */
+    padding: 10px 20px;
+    font-size: 1.1em;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+    min-width: 80px;
+}
+
+#start-button { background-color: #28a745; color: white; border: 1px solid #218838; }
+#start-button:hover:not(:disabled) { background-color: #218838; border-color: #1c7430;}
+#start-button:disabled { background-color: #6c757d; border-color: #6c757d; cursor: not-allowed; color: #adb5bd;}
+
+#stop-button { background-color: #dc3545; color: white; border: 1px solid #c82333; }
+#stop-button:hover:not(:disabled) { background-color: #c82333; border-color: #b01c2a;}
+#stop-button:disabled { background-color: #6c757d; border-color: #6c757d; cursor: not-allowed; color: #adb5bd;}
+
+#pause-button { background-color: #ffc107; color: #212529; border: 1px solid #d39e00; }
+#pause-button:hover:not(:disabled) { background-color: #d39e00; color: white; border-color: #b88a00;}
+#pause-button:disabled { background-color: #6c757d; border-color: #6c757d; cursor: not-allowed; color: #adb5bd;}
+
+#theory-button { background-color: #17a2b8; color: white; border: 1px solid #138496; }
+#theory-button:hover { background-color: #138496; border-color: #106d7c;}
+
+
+/* Area dello spartito VexFlow */
+#score {
+    margin: 20px;
+    margin-top: 20px;
+    padding: 20px;
+    border: 1px solid #1B263B; /* Blu Scuro Secondario */
+    min-height: 320px;
+    max-height: 500px;
+    background-color: #E0E1DD;
+    text-align: center;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    overflow-x: auto;
+    overflow-y: auto;
+    display: block;
+    position: relative;
+    background-image: repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 79px,
+        #CCCCCC 79px,
+        #CCCCCC 80px
+    );
+}
+
+#score svg {
+    display: inline-block;
+    background-color: transparent;
+    position: relative;
+    z-index: 1;
+}
+
+/* Stili VexFlow */
+.vf-annotation text {
+    fill: #1B263B; /* Blu Scuro Secondario */
+    font-size: 0.9em;
+    font-weight: bold;
+}
+
+/* Media Query per schermi più piccoli */
+@media (max-width: 768px) {
+    .app-header { padding: 20px 15px 30px 15px; min-height: 150px; }
+    .floating-note { font-size: 22px; opacity: 0.4;}
+    h1 { font-size: 1.8em; padding: 10px 15px; }
+    
+    .controls, .status-area, .control-buttons, #score { /* .metronome-controls è dentro .controls */
+        padding: 10px; margin-left: 10px; margin-right: 10px;
+    }
+    .controls select { min-width: 120px; } /* Riduci min-width per select */
+    
+    /* Adattamenti per .status-area in media query */
+    .status-area {
+        flex-direction: column; /* Stacka le colonne verticalmente */
+        align-items: stretch; /* Fa sì che le colonne occupino tutta la larghezza disponibile */
+    }
+    .status-column {
+        min-width: unset; /* Rimuove la larghezza minima quando sono impilate */
+        margin-bottom: 10px;
+    }
+    .status-column:last-child {
+        margin-bottom: 0;
+    }
+
+    .errors-list {
+        max-height: 100px; /* Riduci altezza lista errori per schermi piccoli */
+    }
+
+    #score { min-height: 280px; padding: 15px; }
+    .control-buttons button { min-width: 70px; padding: 8px 15px; font-size: 1em; }
+
+    .metronome-controls {
+        padding: 8px; /* Riduci padding interno per metronomo */
+        gap: 8px; /* Riduci gap per metronomo */
+    }
+    .metronome-controls input[type="number"] {
+        width: 60px; /* Riduci larghezza input numero */
+        padding: 6px;
+    }
+    #metronome-toggle-button {
+        padding: 7px 12px;
+        font-size: 0.9em;
+    }
+}
+
+@media (max-width: 480px) {
+    .app-header { padding: 15px 10px 25px 10px; min-height: 120px; }
+    .floating-note { font-size: 20px; opacity: 0.3; }
+    h1 { font-size: 1.6em; }
+    
+    .controls {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch; /* Elementi figli (label, select, .scroll-speed-control, .metronome-controls) si estendono */
+    }
+    .controls > *, .controls > div > * { /* Selettore più generico per elementi diretti e indiretti */
+      /* width: 90%; /* Potrebbe essere troppo restrittivo per elementi inline-block interni */
+      /* margin: 5px auto; /* Centra i blocchi */
+    }
+    .controls label, .controls select, .controls .scroll-speed-control, .metronome-controls {
+        width: auto; /* Permetti larghezza naturale o gestita da flex */
+        max-width: 95%; /* Evita che superi il contenitore */
+        margin: 5px auto; /* Centra i blocchi principali dei controlli */
+    }
+    .scroll-speed-control, .metronome-controls { /* Assicura che questi contenitori usino lo spazio */
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .status-area {
+        align-items: center; /* Se le colonne sono già stackate, centrarle potrebbe avere senso */
+    }
+    .status-column {
+         width: 90%; /* Adatta la larghezza delle colonne stackate */
+         margin-left: auto;
+         margin-right: auto;
+    }
+    .status-column p, .status-column h4 {
+        text-align: center;
+    }
+    .status-area p { width: 100%; }
+    .status-area span { text-align: center; display: block; margin-left: 0; margin-top: 3px; }
+
+
+    .control-buttons { display: flex; flex-direction: column; align-items: stretch; }
+    .control-buttons button { width: 90%; margin: 5px auto; }
+
+    /* Adattamenti specifici per il metronomo su schermi molto piccoli */
+    .metronome-controls {
+        flex-direction: column; /* Stacka gli elementi del metronomo */
+        align-items: stretch; /* Fa sì che gli elementi interni si allarghino */
+        gap: 8px;
+    }
+    .metronome-controls > * { /* Tutti i figli diretti del metronomo */
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center; /* Centra il testo delle label */
+    }
+    .metronome-controls input[type="number"],
+    #metronome-toggle-button {
+        width: 80%; /* Adatta larghezza */
+        max-width: 200px; /* Limite massimo */
+    }
+    .metronome-controls .metronome-auto-start-group {
+        justify-content: center; /* Centra checkbox e label */
+    }
+}
